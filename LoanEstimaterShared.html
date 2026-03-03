@@ -406,7 +406,7 @@
   .page { page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 }
-/* Prevent accidental selector collision with page-2 by scoping its CSS */
+  /* Prevent accidental selector collision with page-2 by scoping its CSS */
 
 .p2 *, .p2 *::before, .p2 *::after { box-sizing: border-box; margin: 0; padding: 0; }.p2 :root {
     --paper:#FDFAF6; --paper-mid:#F5F0E8;
@@ -727,7 +727,7 @@
         </div>
         <div class="rb-row">
           <span class="rb-label">Loan Amount</span>
-          <span class="rb-val">$<input class="ei ei-loanamt autosize" id="loanAmtHero" value="470,600" onblur="evalAmtSync(this,'loanAmount')" oninput="mirrorValue(this,\'loanAmount\')"></span>
+          <span class="rb-val">$<input class="ei ei-loanamt autosize" id="loanAmtHero" value="470,600" onblur="evalAmtSync(this,'loanAmount')" oninput="mirrorValue(this,'loanAmount')"></span>
         </div>
       </div>
     </div>
@@ -786,7 +786,7 @@
   <div class="snapshot">
     <div class="snap-item">
       <div class="snap-label">Loan Amount</div>
-      <div class="snap-value"><span class="cr-amt"><span class="cr-dollar">$</span><input class="ei ei-pval autosize" id="loanAmount" value="470,600" onblur="evalAmtSync(this,'loanAmtHero')" oninput="mirrorValue(this,\'loanAmtHero\')"></span></div>
+      <div class="snap-value"><span class="cr-amt"><span class="cr-dollar">$</span><input class="ei ei-pval autosize" id="loanAmount" value="470,600" onblur="evalAmtSync(this,'loanAmtHero')" oninput="mirrorValue(this,'loanAmtHero')"></span></div>
     </div>
     <div class="snap-item">
       <div class="snap-label">Property Value</div>
@@ -1184,29 +1184,45 @@ function applyAdvisorFromInputs(){
   setText('p2AdvisorNmlsDisplay', m);
 }
 
+/* ===========================
+   ✅ FIX: LocalStorage per LO
+   - Key is unique per page path
+   - Reset also uses the same key
+   - Saves before print
+   =========================== */
+const ADVISOR_LS_KEY = `lp_advisor_v1:${location.pathname}`;
+
 function saveAdvisor(){
   try{
     const payload = {
-      name: document.getElementById('advisorNameInput')?.value || '',
-      title: document.getElementById('advisorTitleInput')?.value || '',
-      nmls: document.getElementById('advisorNmlsInput')?.value || '',
-      phone: document.getElementById('advisorPhoneInput')?.value || ''
+      name:  document.getElementById('advisorNameInput')?.value ?? '',
+      title: document.getElementById('advisorTitleInput')?.value ?? '',
+      nmls:  document.getElementById('advisorNmlsInput')?.value ?? '',
+      phone: document.getElementById('advisorPhoneInput')?.value ?? ''
     };
-    localStorage.setItem('lp_advisor_v1', JSON.stringify(payload));
+    localStorage.setItem(ADVISOR_LS_KEY, JSON.stringify(payload));
   }catch(e){}
 }
 
 function loadAdvisor(){
   try{
-    const raw = localStorage.getItem('lp_advisor_v1');
+    const raw = localStorage.getItem(ADVISOR_LS_KEY);
     if(!raw) return;
+
     const data = JSON.parse(raw);
-    if(data && typeof data === 'object'){
-      if(document.getElementById('advisorNameInput'))  document.getElementById('advisorNameInput').value  = data.name  ?? document.getElementById('advisorNameInput').value;
-      if(document.getElementById('advisorTitleInput')) document.getElementById('advisorTitleInput').value = data.title ?? document.getElementById('advisorTitleInput').value;
-      if(document.getElementById('advisorNmlsInput'))  document.getElementById('advisorNmlsInput').value  = data.nmls  ?? document.getElementById('advisorNmlsInput').value;
-      if(document.getElementById('advisorPhoneInput')) document.getElementById('advisorPhoneInput').value = data.phone ?? document.getElementById('advisorPhoneInput').value;
-    }
+    if(!data || typeof data !== 'object') return;
+
+    const setIfPresent = (id, val) => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(typeof val === 'string') el.value = val;
+    };
+
+    setIfPresent('advisorNameInput',  data.name);
+    setIfPresent('advisorTitleInput', data.title);
+    setIfPresent('advisorNmlsInput',  data.nmls);
+    setIfPresent('advisorPhoneInput', data.phone);
+
   }catch(e){}
 }
 
@@ -1244,7 +1260,7 @@ function wireAdvisorSettings(){
 
   document.getElementById('advisorCloseBtn')?.addEventListener('click', () => toggle(false));
   document.getElementById('advisorResetBtn')?.addEventListener('click', () => {
-    try{ localStorage.removeItem('lp_advisor_v1'); }catch(e){}
+    try{ localStorage.removeItem(ADVISOR_LS_KEY); }catch(e){}
     // Reset to file defaults
     document.getElementById('advisorNameInput').value  = 'Harry Carwile';
     document.getElementById('advisorTitleInput').value = 'Senior Mortgage Consultant';
@@ -1259,6 +1275,12 @@ function wireAdvisorSettings(){
   loadAdvisor();
   applyAdvisorFromInputs();
 }
+
+// Ensure advisor info is applied/saved right before printing
+window.addEventListener('beforeprint', () => {
+  applyAdvisorFromInputs();
+  saveAdvisor();
+});
 
 document.addEventListener('DOMContentLoaded', () => { initPmiPlaceholder(); fitLoanTypeWidth(); wireAdvisorSettings(); });
 </script>
