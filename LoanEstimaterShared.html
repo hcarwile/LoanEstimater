@@ -729,7 +729,7 @@
 <div class="sh-divider cash"></div>
 <div class="cash-breakdown">
 <div class="cb-row">
-<span>New loan amount</span>
+<span>New Loan Amount</span>
 <span class="cb-amt" id="cbLoanAmt">$470,600</span>
 </div>
 <div class="cb-row">
@@ -737,7 +737,7 @@
 <span class="cb-amt deduct">− $<span id="cbPayoff">436,000</span></span>
 </div>
 <div class="cb-row">
-<span>Closing costs</span>
+<span>Closing Costs</span>
 <span class="cb-amt deduct">− $<span id="cbCC">19,600</span></span>
 </div>
 </div>
@@ -827,8 +827,7 @@
 <span>Mortgage Payoff</span>
 <span class="cr-amt"><span class="value-pair tight"><span class="prefix">-</span><span class="prefix">$</span><input class="ei ei-payoff autosize" id="payoff" onblur="evalAmt(this)" oninput="recalc()" value="436,000"/></span></span>
 </div>
-<div class="cost-row"><span>Total Closing Costs</span><span class="cr-amt">-$<span id="ctcCC">19,599.94</span></span></div>
-<div class="cash-total">
+<div class="cost-row"><span>Total Closing Costs</span><span class="cr-amt"><span class="value-pair tight"><span class="prefix">-</span><span class="prefix">$</span><span id="ctcCC">19,599.94</span></span></span></div><div class="cash-total">
 <div class="cash-label">Cash to You at Closing</div>
 <div class="cash-amount" id="ctcCash">$15,000.06</div>
 </div>
@@ -1137,7 +1136,7 @@ function recalc() {
   // Base closing costs (not including financed UFMIP/VA FF)
   const baseCC = totalLC + totalOC;
 
-  // "New loan amount" displayed/used in cash calc:
+  // "New Loan Amount" displayed/used in cash calc:
   const newLoanAmt = loanAmt + addToLoanAmount;
 
   // Closing costs shown/subtracted as true cash costs:
